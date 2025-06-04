@@ -7,7 +7,7 @@ import mill._, define._, api.Result
 import scalalib._, scalalib.scalafmt._, scalalib.publish._, scalajslib._, scalanativelib._
 
 object versions {
-  val scala = "3.3.6"
+  val scala = "3.3.5"
   val scalaJS = "1.16.0"
   val scalaNative = "0.5.7"
 }
@@ -46,7 +46,7 @@ trait BaseModule extends ScalaModule with ScalafmtModule with CiReleaseModule { 
     def scalaVersion = outer.scalaVersion
 
     def ivyDeps = outer.ivyDeps
-
+    
     def artifactName = outer.artifactName
 
     def publishVersion = outer.publishVersion
@@ -85,7 +85,7 @@ object docs extends BaseModule {
   def artifactName = "iron-docs"
 
   val modules: Seq[ScalaModule] =
-    Seq(main, cats, circe, decline, doobie, upickle, ciris, jsoniter, pureconfig, scalacheck, skunk, upickle, zio, zioJson)
+    Seq(main, cats, circe, decline, doobie, upickle, ciris, jsoniter, pureconfig, scalacheck, skunk, upickle, zio, zioJson, scodec)
 
   def docSources = T.sources {
     T.traverse(modules)(_.docSources)().flatten
@@ -325,6 +325,25 @@ object upickle extends SubModule {
   )
 
   object test extends Tests {
+  }
+
+  object js extends JSCrossModule
+
+  object native extends NativeCrossModule
+}
+
+object scodec extends SubModule {
+  def artifactName = "iron-scodec"
+
+  def ivyDeps = Agg(
+    ivy"org.scodec::scodec-core::2.3.2"
+  )
+
+  object test extends Tests {
+    override def ivyDeps = Agg(
+      ivy"com.lihaoyi::utest:0.8.1",
+      ivy"org.scodec::scodec-core::2.3.2"
+    )
   }
 
   object js extends JSCrossModule
