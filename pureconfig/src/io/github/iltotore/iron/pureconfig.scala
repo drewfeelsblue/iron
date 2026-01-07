@@ -1,5 +1,6 @@
 package io.github.iltotore.iron
 
+import _root_.pureconfig.CollectionReaders
 import _root_.pureconfig.ConfigReader
 import _root_.pureconfig.error.FailureReason
 
@@ -28,3 +29,9 @@ object pureconfig:
    */
   given [A](using mirror: RefinedType.Mirror[A], reader: ConfigReader[mirror.IronType]): ConfigReader[A] =
     reader.asInstanceOf[ConfigReader[A]]
+
+  given [V](using readerV: ConfigReader[V]): ConfigReader[Map[String :| Pure, V]] = 
+    CollectionReaders.mapReader(readerV).map(_.map { case (key, value) => (key.refineUnsafe[Pure], value) }.toMap)
+
+  given [A, V](using mirror: RefinedType.Mirror[A], reader: ConfigReader[Map[mirror.IronType, V]]): ConfigReader[Map[A, V]] =
+    reader.asInstanceOf[ConfigReader[Map[A, V]]]
