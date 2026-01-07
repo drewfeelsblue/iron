@@ -30,8 +30,12 @@ object pureconfig:
   given [A](using mirror: RefinedType.Mirror[A], reader: ConfigReader[mirror.IronType]): ConfigReader[A] =
     reader.asInstanceOf[ConfigReader[A]]
 
-  given [V](using readerV: ConfigReader[V]): ConfigReader[Map[String :| Pure, V]] = 
-    CollectionReaders.mapReader(readerV).map(_.map { case (key, value) => (key.refineUnsafe[Pure], value) }.toMap)
+  given [V, C](using readerV: ConfigReader[V], constraint: RuntimeConstraint[String, C]): ConfigReader[Map[String :| C, V]] =
+    ConfigReader.fromCursor: cur =>
+      CollectionReaders.mapReader(readerV).from(cur).flatMap: map =>
+        ConfigReader.Result.sequence(map.map:
+          case (key, value) => cur.scopeFailure(key.refineEither[C].map(_ -> value).left.map(RefinedConfigError(_)))
+        ).map(_.toMap)
 
   given [A, V](using mirror: RefinedType.Mirror[A], reader: ConfigReader[Map[mirror.IronType, V]]): ConfigReader[Map[A, V]] =
     reader.asInstanceOf[ConfigReader[Map[A, V]]]
