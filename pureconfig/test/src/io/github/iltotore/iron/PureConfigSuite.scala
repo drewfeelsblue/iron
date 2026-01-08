@@ -2,6 +2,8 @@ package io.github.iltotore.iron
 
 import _root_.pureconfig.ConfigSource
 import _root_.pureconfig.generic.derivation.default.*
+import io.github.iltotore.iron.constraint.collection.MinLength
+import io.github.iltotore.iron.pureconfig.given
 import utest.*
 
 object PureConfigSuite extends TestSuite:
@@ -20,3 +22,13 @@ object PureConfigSuite extends TestSuite:
         )))
         test("failure") - assert(ConfigSource.string("{ username: a }").load[NewTypeConfig].isLeft)
         test("failure") - assert(ConfigSource.string("{ username: admin, password: p }").load[NewTypeConfig].isLeft)
+
+      test("map"):
+        type PureString = PureString.T
+        object PureString extends RefinedType[String, MinLength[4]]
+
+        test("success") - assert(ConfigSource.string("{ key1: 1 }").load[Map[PureString, Int]] == Right(Map(PureString("key1") -> 1)))
+        test("failure") - assert(ConfigSource.string("{ key: 1 }").load[Map[PureString, Int]].isLeft)
+
+        test("success") - assert(ConfigSource.string("{ key123: 1 }").load[Map[String :| MinLength[5], Int]] == Right(Map("key123" -> 1)))
+        test("failure") - assert(ConfigSource.string("{ key: 1 }").load[Map[String :| MinLength[5], Int]].isLeft)

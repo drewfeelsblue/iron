@@ -1,5 +1,6 @@
 package io.github.iltotore.iron
 
+import _root_.pureconfig.CollectionReaders
 import _root_.pureconfig.ConfigReader
 import _root_.pureconfig.error.FailureReason
 
@@ -28,3 +29,13 @@ object pureconfig:
    */
   given [A](using mirror: RefinedType.Mirror[A], reader: ConfigReader[mirror.IronType]): ConfigReader[A] =
     reader.asInstanceOf[ConfigReader[A]]
+
+  given [V, C](using readerV: ConfigReader[V], constraint: RuntimeConstraint[String, C]): ConfigReader[Map[String :| C, V]] =
+    ConfigReader.fromCursor: cur =>
+      CollectionReaders.mapReader(readerV).from(cur).flatMap: map =>
+        ConfigReader.Result.sequence(map.map:
+          case (key, value) => cur.scopeFailure(key.refineEither[C].map(_ -> value).left.map(RefinedConfigError(_)))
+        ).map(_.toMap)
+
+  given [A, V](using mirror: RefinedType.Mirror[A], reader: ConfigReader[Map[mirror.IronType, V]]): ConfigReader[Map[A, V]] =
+    reader.asInstanceOf[ConfigReader[Map[A, V]]]
