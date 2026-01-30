@@ -87,7 +87,7 @@ object docs extends BaseModule {
   def artifactName = "iron-docs"
 
   val modules: Seq[ScalaModule] =
-    Seq(main, cats, circe, decline, doobie, upickle, ciris, jsoniter, pureconfig, scalacheck, scodec, skunk, upickle, zio, zioJson)
+    Seq(main, cats, chimney, circe, decline, doobie, upickle, ciris, jsoniter, pureconfig, scalacheck, scodec, skunk, upickle, zio, zioJson)
 
   def docSources = T.sources {
     T.traverse(modules)(_.docSources)().flatten
@@ -144,6 +144,7 @@ object docs extends BaseModule {
     ".*cats.*" -> ("scaladoc3", "https://javadoc.io/doc/org.typelevel/cats-docs_3/latest/"),
     ".*io.circe.*" -> ("scaladoc2", "https://circe.github.io/circe/api/"),
     ".*ciris.*" -> ("scaladoc2", "https://cir.is/api/"),
+    ".*chimney.*" -> ("scaladoc3", "https://javadoc.io/doc/io.scalaland/chimney_3/latest/"),
     ".*com.monovore.decline.*" -> ("scaladoc3", "https://javadoc.io/doc/com.monovore/decline_3/latest/"),
     ".*doobie.*" -> ("scaladoc3", "https://www.javadoc.io/doc/org.tpolecat/doobie-core_3/latest/"),
     ".*com.github.plokhotnyuk.jsoniter_scala.core.*" -> ("scaladoc3", "https://www.javadoc.io/doc/com.github.plokhotnyuk.jsoniter-scala/jsoniter-scala-core_3/latest/"),
@@ -554,6 +555,21 @@ object scodec extends SubModule {
 
   def ivyDeps = Agg(
     ivy"org.scodec::scodec-core::2.3.3"
+  )
+
+  object test extends Tests
+
+  object js extends JSCrossModule
+
+  object native extends NativeCrossModule
+}
+
+object chimney extends SubModule {
+
+  def artifactName = "iron-chimney"
+
+  def ivyDeps = Agg(
+    ivy"io.scalaland::chimney::1.8.2"
   )
 
   object test extends Tests

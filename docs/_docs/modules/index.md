@@ -12,6 +12,7 @@ These modules are mostly "support"/"interoperability" modules to provide out of 
 - [Borer](borer.md): Typeclass instances for refinement types.
 - [Cats](cats.md): Typeclass instances and accumulative refinement methods.
 - [Circe](circe.md): Typeclass instances for refinement types.
+- [Chimney](chimney.md): Typeclass instances for refinement types.
 - [Ciris](ciris.md): Typeclass instances for refinement types.
 - [Decline](decline.md): Typeclass instances for refinement types.
 - [Doobie](doobie.md): Typeclass instances for refinement types.
