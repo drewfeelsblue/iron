@@ -4,7 +4,7 @@ title: "Chimney Support"
 
 # Chimney Support
 
-This module provides Transformer instances for refined types for [Chimney](https://github.com/scalalandio/chimney).
+This module provides Transformer/PartialTransformer instances for refined types for [Chimney](https://github.com/scalalandio/chimney).
 
 ## Dependency
 
@@ -49,6 +49,10 @@ final case class PositiveInt(i: Int :| Positive)
 final case class RawInt(i: Int)
 
 PositiveInt(1).transformInto[RawInt].i // 1
+
+RawInt(-1).transformIntoPartial[PositiveInt].asErrorPathMessageStrings // List((i,Should be strictly positive))
+
+RawInt(100).transformIntoPartial[PositiveInt] // Value(PositiveInt(100))
 
 type PureInt = PureInt.T
 object PureInt extends RefinedType[Int, Pure]

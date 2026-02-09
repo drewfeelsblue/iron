@@ -29,3 +29,29 @@ object ChimneySuite extends TestSuite:
     test("Successfull transformation from constrained type (new type) to raw") - assert(
       PositiveIntNT(PositiveIntNewType(1)).transformInto[RawInt].i == 1
     )
+
+    test("Partial transformation from raw type to refined"):
+      final case class From(i: Int)
+      final case class To(i: Int :| Positive)
+
+      test("pos") - assert(From(1).transformIntoPartial[To].asOption == Some(To(1)))
+      test("neg") - assert(From(-1).transformIntoPartial[To].asErrorPathMessageStrings == List("i" -> "Should be strictly positive"))
+
+    test("Partial transformation from raw type to new"):
+      type PositiveInt = PositiveInt.T
+      object PositiveInt extends RefinedType[Int, Positive]
+
+      final case class From(i: Int)
+      final case class To(i: PositiveInt)
+
+      test("pos") - assert(From(1).transformIntoPartial[To].asOption == Some(To(PositiveInt(1))))
+      test("neg") - assert(From(-1).transformIntoPartial[To].asErrorPathMessageStrings == List("i" -> "Should be strictly positive"))
+
+    test("Avoid ambiguous givens (PartialTransformer is automatically derived from regular Transformer)"):
+      type PureString = PureString.T
+      object PureString extends RefinedType[String, Pure]
+
+      final case class From(s: String)
+      final case class To(s: PureString)
+
+      From("qwerty").transformIntoPartial[To]
