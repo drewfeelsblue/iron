@@ -1,7 +1,11 @@
 package io.github.iltotore.iron
 
+import io.github.iltotore.iron.refineEither
 import io.scalaland.chimney.Transformer
+import io.scalaland.chimney.PartialTransformer
 import scala.annotation.targetName
+import io.scalaland.chimney.partial.Result
+import scala.util.NotGiven
 
 object chimney:
   /**
@@ -26,3 +30,15 @@ object chimney:
    * Derives [[io.scalaland.chimney.Transformer]] from raw type to refined (only with [[Pure]] constraint)
    */
   given [A]: Transformer[A, A :| Pure] = _.asInstanceOf[A :| Pure]
+
+  /**
+   * Derives [[io.scalaland.chimney.PartialTransformer]] from raw type to refined
+   */
+  given [A, C](using constraint: RuntimeConstraint[A, C], ev: NotGiven[C =:= Pure]): PartialTransformer[A, A :| C] =
+    PartialTransformer(a => Result.fromEitherString[A :| C](a.refineEither))
+
+  /**
+   * Derives [[io.scalaland.chimney.PartialTransformer]] from raw type to new
+   */
+  given [From, To](using mirror: RefinedType.Mirror[To], transformer: PartialTransformer[From, mirror.IronType]): PartialTransformer[From, To] =
+    transformer.asInstanceOf[PartialTransformer[From, To]]
